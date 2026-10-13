@@ -9,5 +9,3 @@ The original folder contains **209 files** supplied through these [Release downl
 Download the listed ZIP files and extract them at the **repository root**. Each archive stores the original path, so the files land in this directory automatically.
 
 The dataset ZIP files are independent; download every archive listed here to restore this folder completely.
-
-See the repository [checksum manifest](https://github.com/ArviZuko/AI-Based-EM-Image-Restoration/blob/main/RELEASE_MANIFEST.md) to verify downloads.
