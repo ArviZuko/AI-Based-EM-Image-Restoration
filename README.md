@@ -11,8 +11,9 @@ This repository preserves the supplied **AI Restoration Studio** project for res
 | `SRC/Applications/EXE/`, `SRC/Applications/Installer/` | Windows binaries in the Release archive |
 | `SRC/Models/Restoration_Models/` | MIRNet-v2, MPRNet, and NAFNet notebooks, results, and checkpoints |
 | `SRC/Models/Super_Resolution_Models/` | ESRGAN, RCAN, SRCNN, and SwinIR notebooks, results, and checkpoints |
-| `Dataset/` | Paired restoration and super-resolution images in Release archives |
+| [`Dataset/`](Dataset/README.md) | Paired restoration and super-resolution images in Release archives; every original subdirectory has a download guide |
 | `Documentation/` | Report, slides, and demonstration video |
+| [`Screenshots/`](Screenshots/README.md) | Original empty screenshots directory, retained in the repository tree |
 
 ## Large files and dataset
 
@@ -22,6 +23,8 @@ GitHub's per-file Git limit prevents four supplied files from being committed di
 - `dataset-part-01-of-06.zip` through `dataset-part-06-of-06.zip` contain **all 16,636 files** in the supplied `Dataset/` tree. These are independent ZIP archives, not a multipart ZIP.
 
 Extract every archive into the **repository root**, keeping the paths stored inside each ZIP. The resulting `Dataset/Restoration/` and `Dataset/Super Resolution/` folders preserve the supplied train, validation, and test splits. The dataset is also described in the [source publication on Kaggle](https://www.kaggle.com/datasets/omkadam05/semicon-v2-dual-dataset). Release asset hashes are listed in [`RELEASE_MANIFEST.md`](RELEASE_MANIFEST.md).
+
+The repository keeps the original folder hierarchy. Each directory whose files are supplied through a Release archive has its own `README.md` listing the exact archive(s) needed for that directory. This includes the [executable](SRC/Applications/EXE/README.md), [installer](SRC/Applications/Installer/README.md), [NAFNet checkpoint](SRC/Models/Restoration_Models/NAFNet/README.md), and [ESRGAN checkpoint](SRC/Models/Super_Resolution_Models/ESRGAN/README.md).
 
 ## Run the application
 
