@@ -1,46 +1,121 @@
-# AI-Based EM Image Restoration
+# AI Restoration Studio
 
-This repository preserves the supplied **AI Restoration Studio** project for restoration and super-resolution of grayscale scanning electron microscopy images. The desktop app implements a Restormer restoration stage followed by EDSR 2× super-resolution. The supplied folder also contains training notebooks, evaluation outputs, model checkpoints, documentation, an installer, and paired datasets.
+**AI-Powered Image Denoising and Super-Resolution Platform**
 
-## Project layout
+AI Restoration Studio is a standalone deep-learning system for restoring degraded grayscale microscopy and semiconductor images. It combines Restormer for same-resolution denoising and restoration with EDSR for 2x super-resolution in a reproducible desktop and command-line workflow.
 
-| Path | Contents |
-| --- | --- |
-| `SRC/Applications/Source Code/` | PyQt6 desktop application and assets |
-| `SRC/Applications/ISS/` | Inno Setup installer definition |
-| `SRC/Applications/EXE/`, `SRC/Applications/Installer/` | Windows binaries in the Release archive |
-| `SRC/Models/Restoration_Models/` | MIRNet-v2, MPRNet, and NAFNet notebooks, results, and checkpoints |
-| `SRC/Models/Super_Resolution_Models/` | ESRGAN, RCAN, SRCNN, and SwinIR notebooks, results, and checkpoints |
-| [`Dataset/`](Dataset/README.md) | Paired restoration and super-resolution images in Release archives; every original subdirectory has a download guide |
-| `Documentation/` | Report, slides, and demonstration video |
-| [`Screenshots/`](Screenshots/README.md) | Original empty screenshots directory, retained in the repository tree |
+```text
+Input image
+    -> Restormer denoising/restoration
+    -> EDSR 2x super-resolution
+    -> enhanced output
+```
 
-## Large files and dataset
+## Key capabilities
 
-GitHub's per-file Git limit prevents four supplied files from being committed directly. Download [release `v1.0-project-files`](https://github.com/ArviZuko/AI-Based-EM-Image-Restoration/releases/tag/v1.0-project-files):
+- Fixed, reproducible Restormer-to-EDSR inference pipeline.
+- Native Windows desktop application and installer definition.
+- Standalone command-line inference and reference-based evaluation.
+- Reproducible training notebooks and trained checkpoints.
+- Benchmark histories, metrics, plots, and representative test outputs.
+- Dataset documentation, integrity audit, and technical project report.
 
-- `large-project-files.zip` contains the supplied Windows executable and installer plus `NAFNet_weights.pth` and `ESRGAN_weights.pth`.
-- `dataset-part-01-of-06.zip` through `dataset-part-06-of-06.zip` contain **all 16,636 files** in the supplied `Dataset/` tree. These are independent ZIP archives, not a multipart ZIP.
+## Dataset
 
-Extract every archive into the **repository root**, keeping the paths stored inside each ZIP. The resulting `Dataset/Restoration/` and `Dataset/Super Resolution/` folders preserve the supplied train, validation, and test splits. The dataset is also described in the [source publication on Kaggle](https://www.kaggle.com/datasets/omkadam05/semicon-v2-dual-dataset).
+The experiments use a dual restoration dataset derived from 4,158 NFFA-Europe MEMS SEM source images. The published archive identifiers are retained for reproducibility:
 
-The repository keeps the original folder hierarchy. Each directory whose files are supplied through a Release archive has its own `README.md` listing the exact archive(s) needed for that directory. This includes the [executable](SRC/Applications/EXE/README.md), [installer](SRC/Applications/Installer/README.md), [NAFNet checkpoint](SRC/Models/Restoration_Models/NAFNet/README.md), and [ESRGAN checkpoint](SRC/Models/Super_Resolution_Models/ESRGAN/README.md).
+- `SEMICON_SR_2X_v2`: 512x384 LR to 1024x768 HR, with bicubic 2x downsampling.
+- `SEMICON_Noise_v2`: 1024x768 degraded input to 1024x768 clean target, covering 11 documented degradation families.
+- Shared source-level split: 2,910 training, 831 validation, and 417 test images.
 
-## Run the application
+Download the published dataset from [Kaggle](https://www.kaggle.com/datasets/omkadam05/semicon-v2-dual-dataset). The multi-gigabyte archives are intentionally excluded from GitHub. See [`Dataset/README.md`](Dataset/README.md) and [`Dataset/Dataset_Audit_Report.pdf`](Dataset/Dataset_Audit_Report.pdf).
 
-Install Python 3.10–3.12 and dependencies:
+## Repository structure
+
+```text
+AI-Restoration-Studio/
+├── README.md
+├── requirements.txt
+├── App/
+│   ├── app.py
+│   ├── AI_Restoration_Studio.exe
+│   ├── AI_Restoration_Studio.iss
+│   └── assets/
+├── Dataset/
+│   ├── README.md
+│   └── Dataset_Audit_Report.pdf
+├── Documentation/
+│   ├── Final_Project_Report.pdf
+│   └── AI_Restoration_Studio_Project_Presentation.pptx
+├── Evaluation/
+│   └── inference.py
+├── Models/
+│   ├── README.md
+│   ├── Restoration_Models/
+│   ├── Super_Resolution_Models/
+│   └── Final_Selected_Models/
+└── Outputs/
+    ├── README.md
+    ├── Benchmark_Results/
+    └── Test_Outputs/
+```
+
+## Installation
+
+Python 3.10-3.12 is recommended.
 
 ```powershell
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
+python -m pip install --upgrade pip
 python -m pip install -r requirements.txt
-python "SRC\Applications\Source Code\app.py"
 ```
 
-**Checkpoint availability:** The supplied folder does not contain the `Restormer_weights.pth` and `EDSR_weights.pth` files required by the desktop application's fixed pipeline. Place compatible checkpoints beside `app.py` or in a `weights` subfolder before running inference. The included checkpoints belong to the seven model experiments listed above; they do not substitute for those two files.
+GPU acceleration is used automatically when a compatible PyTorch CUDA installation is available. The included requirements do not force a specific CUDA build.
 
-The installer and executable in the Release archive are supplied as received. Their runtime behavior has not been independently verified here.
+## Evaluation and inference
 
-## Attribution
+Run the deployed Restormer-to-EDSR pipeline:
 
-The dataset is derived from NFFA-Europe SEM imagery. Check the source dataset and model licenses before redistribution or other reuse. No project-level license was supplied.
+```powershell
+python Evaluation\inference.py --input sample.png --mode full
+```
+
+Run an individual stage:
+
+```powershell
+python Evaluation\inference.py --input noisy_images --mode denoise
+python Evaluation\inference.py --input lr_images --mode sr
+```
+
+Evaluate against an explicitly supplied ground-truth directory:
+
+```powershell
+python Evaluation\inference.py --input test_inputs --ground-truth test_gt --mode denoise
+```
+
+Output are written as PNG images together with `per_image_metrics.csv` and `summary.json`. PSNR, SSIM, MAE, MSE, and RMSE are calculated only when matching ground truth is supplied.
+
+## Desktop application
+
+Run from source with `python "App\Source Code\app.py"`. No verified standalone executable was available in the cleaned project, so `App/EXE/` is intentionally empty. The application implements the fixed `Restormer -> EDSR x2` workflow.
+
+## Models
+
+Eight core experiments are retained for reproducibility and comparison: SRCNN, EDSR, RCAN, ESRGAN, MIRNet-v2, MPRNet, NAFNet, and Restormer. A SwinIR benchmark is also retained because its verified notebook, checkpoint, and outputs are available.
+
+The deployed models are Restormer for same-resolution restoration and EDSR for 2x super-resolution. See [`Models/README.md`](Models/README.md) for task assignments and selection rationale.
+
+## Documentation
+
+- [`Documentation/Comprehensive_Document/Final_Project_Report.pdf`](Documentation/Comprehensive_Document/Final_Project_Report.pdf)
+- [`Documentation/PPT/AI_Restoration_Studio_Project_Presentation.pptx`](Documentation/PPT/AI_Restoration_Studio_Project_Presentation.pptx)
+- [`BRANDING_AUDIT.md`](BRANDING_AUDIT.md)
+
+## Large files and release readiness
+
+Checkpoint files and the Windows executable are assigned to Git LFS. Before public release, confirm Git LFS quota and all applicable dataset, architecture, and checkpoint licensing terms. Rebuild the executable and installer after changing application assets so compiled resources match the source tree.
+
+## Attribution and licensing
+
+The source imagery originates from NFFA-Europe. Users must follow the authoritative source-data and published-dataset terms. Model architectures and checkpoints may also be governed by their originating project licenses. No verified project-level license was available in the supplied artifacts.
